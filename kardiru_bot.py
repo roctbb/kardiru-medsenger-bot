@@ -168,7 +168,7 @@ def receive():
     file_string = base64.b64encode(file.read())
 
     medsenger_api.send_message(contract.id, "ЭКГ от карди.ру", send_from='patient',
-                               attachments=[["ecg.pdf", "application/pdf", file_string]])
+                               attachments=[["ecg.zip", "application/zip", file_string]])
 
     return 'ok'
 
