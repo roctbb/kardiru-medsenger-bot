@@ -7,35 +7,20 @@ import datetime
 from config import *
 import kardiru_api
 from medsenger_api import AgentApiClient
-from flask_sqlalchemy import SQLAlchemy
 from uuid import uuid4
+from manage import *
+from models import Contract
 from datetime import datetime
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
-
-app = Flask(__name__)
-db_string = "postgres://{}:{}@{}:{}/{}".format(DB_LOGIN, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE)
-app.config['SQLALCHEMY_DATABASE_URI'] = db_string
-db = SQLAlchemy(app)
-
 
 def gts():
     now = datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S")
 
 
-class Contract(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    serial_number = db.Column(db.String(255), nullable=True)
-    model = db.Column(db.String(255), nullable=True)
-    email = db.Column(db.String(255), nullable=True)
-    password = db.Column(db.String(255), nullable=True)
-
-
-try:
+with app.app_context():
     db.create_all()
-except:
-    print('cant create structure')
 
 
 @app.route('/status', methods=['POST'])
