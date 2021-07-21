@@ -144,8 +144,9 @@ def receive():
     file = request.files.get('EMRfile')
     filename = file.filename
 
-    _, contract_id, _ = filename.split('_')
-
+    parts = filename.split('_')
+    contract_id = parts[1]
+    
     contract = Contract.query.filter_by(id=contract_id).first()
     if not contract:
         abort(404)
