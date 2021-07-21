@@ -133,7 +133,6 @@ def index():
 @app.route('/receive', methods=['POST'])
 def receive():
     data = request.form
-    print("{}: Got {}".format(gts(), data))
 
     if data.get('channel') != CHANNEL_ID or data.get('pass') != CHANNEL_PASSWORD:
         abort(403)
