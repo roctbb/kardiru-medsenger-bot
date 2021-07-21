@@ -18,12 +18,12 @@
 
         <div class="form-group">
             <strong>Модель:</strong>
-            <input type="text" class="form-control" name="model" value="{{ str(contract['model']) }}"/>
+            <input type="text" class="form-control" name="model" value="{% if contract['model'] %}{{ contract['model'] }}{% endif %}"/>
         </div>
 
         <div class="form-group">
             <strong>Серийный номер:</strong>
-            <input type="text" class="form-control" name="serial_number" value="{{ str(contract['serial_number']) }}"/>
+            <input type="text" class="form-control" name="serial_number" value="{% if contract['serial_number'] %}{{ contract['serial_number'] }}{% endif %}"/>
         </div>
 
         <div class="form-group">
