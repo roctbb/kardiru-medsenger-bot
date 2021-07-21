@@ -138,7 +138,7 @@ def receive():
     if data.get('channel') != CHANNEL_ID or data.get('pass') != CHANNEL_PASSWORD:
         abort(403)
 
-    if request.files.get('EMRfile'):
+    if not request.files.get('EMRfile'):
         abort(422)
 
     file = request.files.get('EMRfile')
