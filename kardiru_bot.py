@@ -142,6 +142,7 @@ def receive():
 
     file = request.files.get('EMRfile')
     filename = file.filename
+    print(filename)
 
     parts = filename.split('_')
     contract_id = parts[1]
