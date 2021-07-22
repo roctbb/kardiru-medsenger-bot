@@ -62,12 +62,13 @@ def init():
 
         if 'params' in data:
             if data['params'].get('kardiru_model') and data['params'].get('kardiru_serial', ''):
-                contract.model = "1511"
+
                 contract.serial_number = data['params']['kardiru_serial']
 
         info = medsenger_api.get_patient_info(contract_id)
         contract.email = info['email']
         contract.password = str(uuid.uuid4()).replace('-', '')
+        contract.model = "1511"
 
         birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
 
