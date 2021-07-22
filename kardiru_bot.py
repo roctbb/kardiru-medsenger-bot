@@ -73,8 +73,9 @@ def init():
         birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
 
         if contract.model and contract.serial_number:
-            if kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
-                                     contract.password, info['name'], info['sex']):
+            result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
+                                     contract.password, info['name'], info['sex'])
+            if result:
                 print(gts(), "Subscribed {}".format(contract.id))
             else:
                 print(gts(), "Not subscribed {}".format(contract.id))
@@ -202,8 +203,10 @@ def setting_save():
             birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
 
             if contract.serial_number and contract.model:
-                kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
+                result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
                                       contract.password, info['name'], info['sex'])
+                if not result:
+                    return render_template('settings.html', contract=contract, error=error)
             db.session.commit()
         else:
             return "<strong>Ошибка. Контракт не найден.</strong> Попробуйте отключить и снова подключить интеллектуальный агент к каналу консультирвоания.  Если это не сработает, свяжитесь с технической поддержкой."

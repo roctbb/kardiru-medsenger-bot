@@ -52,10 +52,14 @@ def subscribe(model, serial_number, contract_id, birthday, email, password, name
         answer = requests.post(KARDIRU_HOST + 'rest/device/issue', json=data)
         print(answer.text)
 
-        return True
+        if answer.json().get('code') != 0:
+            return False, answer.json().get('message')
+
+        return True, answer.json().get('message')
+
     except Exception as e:
         print(e)
-        return False
+        return False, "Ошибка соединения"
 
 
 def unsubscribe(model, serial_number, contract_id):
@@ -72,13 +76,11 @@ def unsubscribe(model, serial_number, contract_id):
 
     try:
         answer = requests.post(KARDIRU_HOST + 'rest/device/return', json=data)
-        print(answer.text)
 
-        if answer.text != "OK":
-            print('Answer not OK')
-            return False
+        if answer.json().get('code') != 0:
+            return False, answer.json().get('message')
 
-        return True
+        return True, answer.json().get('message')
     except Exception as e:
         print(e)
-        return False
+        return False, "Ошибка соединения"
