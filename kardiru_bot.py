@@ -147,7 +147,7 @@ def receive():
     print(filename)
 
     parts = filename.split('_')
-    contract_id = parts[1]
+    contract_id = parts[2]
     
     contract = Contract.query.filter_by(id=contract_id).first()
     if not contract:
