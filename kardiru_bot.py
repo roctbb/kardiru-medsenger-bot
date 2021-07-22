@@ -151,7 +151,7 @@ def receive():
     
     contract = Contract.query.filter_by(id=contract_id).first()
     if not contract:
-        abort(404)
+        abort(200)
 
     file_string = base64.b64encode(file.read())
 
