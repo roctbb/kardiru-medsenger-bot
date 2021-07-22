@@ -195,7 +195,8 @@ def setting_save():
         contract = Contract.query.filter_by(id=contract_id).first()
 
         if contract:
-            kardiru_api.unsubscribe(contract.model, contract.serial_number, contract.id)
+            if contract.serial_number:
+                kardiru_api.unsubscribe(contract.model, contract.serial_number, contract.id)
 
             contract.model = request.form.get('model')
             contract.serial_number = request.form.get('serial_number')
