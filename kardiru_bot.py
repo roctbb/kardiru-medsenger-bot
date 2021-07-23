@@ -14,6 +14,7 @@ from datetime import datetime
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 
+
 def gts():
     now = datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S")
@@ -62,7 +63,6 @@ def init():
 
         if 'params' in data:
             if data['params'].get('kardiru_model') and data['params'].get('kardiru_serial', ''):
-
                 contract.serial_number = data['params']['kardiru_serial']
 
         info = medsenger_api.get_patient_info(contract_id)
@@ -74,11 +74,19 @@ def init():
 
         if contract.model and contract.serial_number:
             result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
-                                     contract.password, info['name'], info['sex'])
+                                                  contract.password, info['name'], info['sex'])
             if result:
                 print(gts(), "Subscribed {}".format(contract.id))
+                medsenger_api.send_message(contract.id, only_patient=True,
+                                           text="Создан личный кабинет на <a target='_blank' href='https://kardi.ru'>Kardi.RU</a>. Там можно посмотреть все ЭКГ, снятые прибором Карди.ру, но кроме этого мы будем автоматически пересылать их Вашему врачу прямо в Medsenger. \n\n<b>Логин:</b> {}\n<b>Пароль:</b> {}".format(
+                                               info['email'], contract.password))
             else:
                 print(gts(), "Not subscribed {}".format(contract.id))
+
+                if error == 'Данный E-mail уже используется в системе':
+                    medsenger_api.send_message(contract.id, only_patient=True,
+                                               text='Мы попытались создать для Вас личный кабинет для прибора карди.ру, но похоже, что Вы уже использовали такой прибор ранее и у Вас уже есть личный кабинет. Чтобы Ваши ЭКГ автоматически пересылались врачу, пожалуйста, укажите ваш пароль. Если вы не помните его, воспользуйтесь восстановлением пароля на сайте <a href="https://kardi.ru">kardi.ru</a>. Ваш логин - {}.'.format(
+                                                   info['email']), action_name="Настроить", action_link='setup')
 
         db.session.commit()
 
@@ -114,7 +122,7 @@ def remove():
 
             print("{}: Deactivate contract {}".format(gts(), contract.id))
 
-            contract.delete()
+            db.session.delete(contract)
             db.session.commit()
 
         else:
@@ -148,7 +156,7 @@ def receive():
 
     parts = filename.split('_')
     contract_id = parts[2]
-    
+
     contract = Contract.query.filter_by(id=contract_id).first()
     if not contract:
         abort(200)
@@ -205,8 +213,20 @@ def setting_save():
 
             if contract.serial_number and contract.model:
                 result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
-                                      contract.password, info['name'], info['sex'])
+                                                      contract.password, info['name'], info['sex'])
                 if not result:
+                    return render_template('settings.html', contract=contract, error=error)
+
+                if result:
+                    medsenger_api.send_message(contract.id, only_patient=True,
+                                               text="Активирован личный кабинет на <a target='_blank' href='https://kardi.ru'>Kardi.RU</a>. Там можно посмотреть все ЭКГ, снятые прибором Карди.ру, но кроме этого мы будем автоматически пересылать их Вашему врачу прямо в Medsenger. \n\n<b>Логин:</b> {}\n<b>Пароль:</b> {}".format(
+                                                   info['email'], contract.password))
+                else:
+                    if error == 'Данный E-mail уже используется в системе':
+                        medsenger_api.send_message(contract.id, only_patient=True,
+                                                   text='Мы попытались создать для Вас личный кабинет для прибора карди.ру, но похоже, что Вы уже использовали такой прибор ранее и у Вас уже есть личный кабинет. Чтобы Ваши ЭКГ автоматически пересылались врачу, пожалуйста, укажите ваш пароль. Если вы не помните его, воспользуйтесь восстановлением пароля на сайте <a href="https://kardi.ru">kardi.ru</a>. Ваш логин - {}.'.format(
+                                                       info['email']), action_name="Настроить", action_link='setup')
+                        error += '. Мы отправили пациенту просьбу указать его пароль.'
                     return render_template('settings.html', contract=contract, error=error)
             db.session.commit()
         else:
