@@ -208,6 +208,7 @@ def setting_save():
 
             contract.model = request.form.get('model')
             contract.serial_number = request.form.get('serial_number')
+            contract.password = request.form.get('password')
             info = medsenger_api.get_patient_info(contract_id)
             birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
 
@@ -225,7 +226,69 @@ def setting_save():
                                                    text='Мы попытались создать для Вас личный кабинет для прибора карди.ру, но похоже, что Вы уже использовали такой прибор ранее и у Вас уже есть личный кабинет. Чтобы Ваши ЭКГ автоматически пересылались врачу, пожалуйста, укажите ваш пароль. Если вы не помните его, воспользуйтесь восстановлением пароля на сайте <a href="https://kardi.ru">kardi.ru</a>. Ваш логин - {}.'.format(
                                                        info['email']), action_name="Настроить", action_link='setup')
                         error += '. Мы отправили пациенту просьбу указать его пароль.'
-                    return render_template('settings.html', contract=contract, error=error)
+                    return render_template('setup.html', contract=contract, error=error)
+            db.session.commit()
+        else:
+            return "<strong>Ошибка. Контракт не найден.</strong> Попробуйте отключить и снова подключить интеллектуальный агент к каналу консультирвоания.  Если это не сработает, свяжитесь с технической поддержкой."
+
+    except Exception as e:
+        print(e)
+        return "error"
+
+    return """
+        <strong>Спасибо, окно можно закрыть</strong><script>window.parent.postMessage('close-modal-success','*');</script>
+        """
+
+@app.route('/setup', methods=['GET'])
+def settings():
+    key = request.args.get('api_key', '')
+
+    if key != API_KEY:
+        return "<strong>Некорректный ключ доступа.</strong> Свяжитесь с технической поддержкой."
+
+    try:
+        contract_id = int(request.args.get('contract_id'))
+        query = Contract.query.filter_by(id=contract_id)
+        if query.count() != 0:
+            contract = query.first()
+        else:
+            return "<strong>Ошибка. Контракт не найден.</strong> Попробуйте отключить и снова подключить интеллектуальный агент к каналу консультирвоания.  Если это не сработает, свяжитесь с технической поддержкой."
+
+    except Exception as e:
+        print(e)
+        return "error"
+
+    return render_template('settings.html', contract=contract)
+
+
+@app.route('/settings', methods=['POST'])
+def setting_save():
+    key = request.args.get('api_key', '')
+
+    if key != API_KEY:
+        return "<strong>Некорректный ключ доступа.</strong> Свяжитесь с технической поддержкой."
+
+    try:
+        contract_id = int(request.args.get('contract_id'))
+        contract = Contract.query.filter_by(id=contract_id).first()
+
+        if contract:
+            if contract.serial_number:
+                kardiru_api.unsubscribe(contract.model, contract.serial_number, contract.id)
+
+            info = medsenger_api.get_patient_info(contract_id)
+            birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
+            contract.password = request.form.get('password')
+
+            if contract.serial_number and contract.model:
+                result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
+                                                      contract.password, info['name'], info['sex'])
+
+                if not result:
+                    return render_template('setup.html', contract=contract, error=error)
+                else:
+                    medsenger_api.send_message(contract_id=contract.id, text="Пациент подключил кабинет Карди.Ру.", only_doctor=True)
+                    medsenger_api.send_message(contract_id=contract.id, text="Кабинет Карди.Ру подключен, теперь Ваши ЭКГ автоматически пересылаются врачу.", only_patient=True)
             db.session.commit()
         else:
             return "<strong>Ошибка. Контракт не найден.</strong> Попробуйте отключить и снова подключить интеллектуальный агент к каналу консультирвоания.  Если это не сработает, свяжитесь с технической поддержкой."

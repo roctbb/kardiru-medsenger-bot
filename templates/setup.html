@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Карди.РУ: настройка интеграции</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <h4 style="margin-top: 15px; margin-bottom: 15px;">Карди.РУ: настройка интеграции</h4>
+
+    {% if error %}
+        <p><strong style="color: red">{{ error }}</strong></p>
+    {% endif %}
+
+    <form method="POST">
+
+        <div class="form-group">
+            <strong>Пароль от личного кабинета:</strong>
+            <input type="text" class="form-control" name="password" value="{% if contract['password'] %}{{ contract['password'] }}{% endif %}"/>
+        </div>
+
+        <div class="form-group">
+            <button class="btn-lg btn btn-success">Сохранить</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
