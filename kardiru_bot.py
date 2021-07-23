@@ -226,7 +226,7 @@ def setting_save():
                                                    text='Мы попытались создать для Вас личный кабинет для прибора карди.ру, но похоже, что Вы уже использовали такой прибор ранее и у Вас уже есть личный кабинет. Чтобы Ваши ЭКГ автоматически пересылались врачу, пожалуйста, укажите ваш пароль. Если вы не помните его, воспользуйтесь восстановлением пароля на сайте <a href="https://kardi.ru">kardi.ru</a>. Ваш логин - {}.'.format(
                                                        info['email']), action_name="Настроить", action_link='setup')
                         error += '. Мы отправили пациенту просьбу указать его пароль.'
-                    return render_template('setup.html', contract=contract, error=error)
+                    return render_template('settings.html', contract=contract, error=error)
             db.session.commit()
         else:
             return "<strong>Ошибка. Контракт не найден.</strong> Попробуйте отключить и снова подключить интеллектуальный агент к каналу консультирвоания.  Если это не сработает, свяжитесь с технической поддержкой."
@@ -240,7 +240,7 @@ def setting_save():
         """
 
 @app.route('/setup', methods=['GET'])
-def settings():
+def setup():
     key = request.args.get('api_key', '')
 
     if key != API_KEY:
@@ -258,11 +258,11 @@ def settings():
         print(e)
         return "error"
 
-    return render_template('settings.html', contract=contract)
+    return render_template('setup.html', contract=contract)
 
 
-@app.route('/settings', methods=['POST'])
-def setting_save():
+@app.route('/setup', methods=['POST'])
+def setup_save():
     key = request.args.get('api_key', '')
 
     if key != API_KEY:
