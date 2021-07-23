@@ -214,8 +214,6 @@ def setting_save():
             if contract.serial_number and contract.model:
                 result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
                                                       contract.password, info['name'], info['sex'])
-                if not result:
-                    return render_template('settings.html', contract=contract, error=error)
 
                 if result:
                     medsenger_api.send_message(contract.id, only_patient=True,
