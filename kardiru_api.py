@@ -67,7 +67,7 @@ def unsubscribe(model, serial_number, contract_id):
         "model": model,
         "serialNumber": serial_number,
         "exporterId": EXPORTER_ID,
-        "dateOfDeviceComeBackFromClient": datetime.utcnow().replace(tzinfo=simple_utc()).isoformat(),
+        "dateOfDeviceComeBackFromClient": datetime.now().strftime('%Y-%m-%dT00:00:00.000+03:00'),
         "clientCode": contract_id,
         "deviceAgentCode": DEVICE_AGENT_CODE
     }
