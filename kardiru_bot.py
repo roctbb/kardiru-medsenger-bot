@@ -11,6 +11,8 @@ from uuid import uuid4
 from manage import *
 from models import Contract
 from datetime import datetime
+from zipfile import ZipFile
+from tempfile import TemporaryFile
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 
@@ -152,7 +154,6 @@ def receive():
 
     file = request.files.get('EMRfile')
     filename = file.filename
-    print(filename)
 
     parts = filename.split('_')
     contract_id = parts[2]
@@ -161,10 +162,20 @@ def receive():
     if not contract:
         abort(200)
 
-    file_string = base64.b64encode(file.read())
+    attachments = []
+
+    # file_string = base64.b64encode(file.read())
+    with TemporaryFile() as tmp:
+        tmp.write(file.read())
+        archive = ZipFile(tmp, 'r')
+        for file in archive.filelist:
+            content = archive.read(file.filename)
+            attachments.append([
+                file.filename, "application/pdf", base64.b64encode(content)
+            ])
 
     medsenger_api.send_message(contract.id, "ЭКГ от карди.ру", send_from='patient',
-                               attachments=[["ecg.zip", "application/zip", file_string]])
+                               attachments=attachments)
 
     return 'ok'
 
