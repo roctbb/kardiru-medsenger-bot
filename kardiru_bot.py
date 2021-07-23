@@ -212,6 +212,8 @@ def setting_save():
             info = medsenger_api.get_patient_info(contract_id)
             birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
 
+            db.session.commit()
+
             if contract.serial_number and contract.model:
                 result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
                                                       contract.password, info['name'], info['sex'])
