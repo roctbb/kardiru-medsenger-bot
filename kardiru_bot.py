@@ -116,7 +116,7 @@ def remove():
         if query.count() != 0:
             contract = query.first()
 
-            if contract.login and contract.patient:
+            if contract.serial_number and contract.patient:
                 if kardiru_api.unsubscribe(contract.model, contract.serial_number, contract.id):
                     print("{}: Unsubscribed {}".format(gts(), contract.id))
                 else:
