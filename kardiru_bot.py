@@ -75,8 +75,8 @@ def init():
         birthday = datetime.strptime(info['birthday'], '%d.%m.%Y')
 
         if contract.model and contract.serial_number:
-            result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, contract.email,
-                                                  contract.password, info['name'], info['sex'])
+            result, error = kardiru_api.subscribe(contract.model, contract.serial_number, contract_id, birthday, "{}+cardio@medsenger.ru".format(contract_id),
+                                                  contract.password, "Пациент", info['sex'])
             if result:
                 print(gts(), "Subscribed {}".format(contract.id))
                 medsenger_api.send_message(contract.id, only_patient=True,
