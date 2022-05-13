@@ -92,6 +92,9 @@ def init():
 
         db.session.commit()
 
+        medsenger_api.add_record(data.get('contract_id'), 'doctor_action',
+                                 'Подключен прибор "Карди.ру" (серийный номер {}).'.format(contract.serial_number))
+
 
     except Exception as e:
         print(e)
@@ -124,8 +127,13 @@ def remove():
 
             print("{}: Deactivate contract {}".format(gts(), contract.id))
 
+            sn = contract.serial_number
+
             db.session.delete(contract)
             db.session.commit()
+
+            medsenger_api.add_record(data.get('contract_id'), 'doctor_action',
+                                     'Отключен прибор "Карди.ру" (серийный номер {}).'.format(sn))
 
         else:
             print('contract not found')
@@ -251,6 +259,7 @@ def setting_save():
     return """
         <strong>Спасибо, окно можно закрыть</strong><script>window.parent.postMessage('close-modal-success','*');</script>
         """
+
 
 # @app.route('/setup', methods=['GET'])
 # def setup():
