@@ -1,1 +1,1 @@
-supervisorctl restart agents-kardiru
+touch /etc/uwsgi/apps/kardiru.ini
